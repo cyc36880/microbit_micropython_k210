@@ -1,0 +1,11 @@
+WHITE = 0
+BLACK = 1 # 黑色必须为1；用于灰度黑线判断
+RED   = 2
+ORANGE= 3
+YELLOW= 4
+GREEN = 5
+CYAN  = 6
+BLUE  = 7
+PURPLE= 8
+
+COLOR_NONE = -1
