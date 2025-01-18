@@ -6,18 +6,30 @@ class iic_base:
         self._addr = addr
     
     def write_bytes(self, data:list):
-        i2c.write(self._addr, bytes(data), False)
+        try:
+            i2c.write(self._addr, bytes(data), False)
+        except:
+            return
 
     def read_bytes(self, length:int):
-        return i2c.read(self._addr, length, False)
+        try:
+            return i2c.read(self._addr, length, False)
+        except:
+            return [0]*length
 
     def read_reg(self, reg, length): # 返回列表
-        i2c.write(self._addr, bytes([reg]), True)
-        return i2c.read(self._addr, length, False)
+        try:
+            i2c.write(self._addr, bytes([reg]), True)
+            return i2c.read(self._addr, length, False)
+        except:
+            return [0]*length
         
     def write_reg(self, reg, data:list):
-        data.insert(0, reg)
-        i2c.write(self._addr, bytes(data),  False)
+        try:
+            data.insert(0, reg)
+            i2c.write(self._addr, bytes(data),  False)
+        except:
+            return
     
     def is_ready(self): # 是否在线
         try:
