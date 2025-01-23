@@ -20,10 +20,10 @@ class joystick_sensor(iic_base.iic_base):
         return uigned8_to_signedInt(data[2])
     
     def is_up(self):# 操纵杆是否向上 
-        return True if self.get_y()>50 else False
+        return True if self.get_y()<-50 else False
     
     def is_down(self): # 操纵杆是否向下 
-        return True if self.get_y()<-50 else False
+        return True if self.get_y()>50 else False
     
     def is_left(self): # 是否向左
         return True if self.get_x()<-50 else False

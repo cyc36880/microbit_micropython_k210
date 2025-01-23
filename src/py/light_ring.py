@@ -19,12 +19,15 @@ _color_map = \
     color.GREEN:(0, 255, 0),
     color.ORANGE:(255, 165, 0),
     color.PURPLE:(128, 0, 128),
+    color.WHITE : (255, 255, 255),
+    color.RED : (255, 0, 0),
+    color.YELLOW : (255, 255, 0)
 }
 
 
 class light_ring():
     def __init__(self, port):
-        self._light = 1.0
+        self._light = 0.05
         self._handle = neopixel.NeoPixel(port, 8)
         
     def light(self, light): # 设置亮度 0 - 255

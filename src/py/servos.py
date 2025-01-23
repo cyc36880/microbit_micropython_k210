@@ -1,4 +1,3 @@
-from microbit import *
 import DC_motor
 
 S1 = 0
@@ -11,7 +10,7 @@ class servos():
         self.port = port
         self._handle = DC_motor.motor(port)
 
-    def angle(self, angle:int): # 设置角度 0 - 180
+    def write_angle(self, angle:int): # 设置角度 0 - 180
         angle = 0 if angle<0 else angle
         angle = 180 if angle>180 else angle
         us = (angle * 1800 * 0.6 / 180 + 600) # 0.6 ~ 2.4

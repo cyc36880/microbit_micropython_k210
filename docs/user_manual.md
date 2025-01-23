@@ -2,18 +2,39 @@
 
 
 
-基本示例：
+本文假设读者拥有一定的python基础，对于python的基本使用不再解释。下面给出使用的基本示例供参考
+
+
+
+示例：
 
 ```python
-import server_motor # 文件名
+import server_motor # 导入库（文件名）
 
-m1 = server_motor.motor() # 创建设备对象
+m1 = server_motor.motor(addr = 0x51) # 创建设备对象
 
 while True:
     m1.run(20) # 对象使用
 ```
 
 
+
+# iic_base
+
+
+
+<big>***文件：iic_base.py***</big>
+
+
+
+```python
+
+class iic_base:
+
+    def is_ready(self): # 是否在线
+        pass
+    
+```
 
 
 
@@ -54,6 +75,11 @@ COLOR_NONE = -1
 
 
 ```python
+GENERAL      # 通用地址
+LIGHT_RED    # 红灯
+LIGHT_GREEN  # 绿灯
+LIGHT_BLUE   # 蓝灯
+LIGHT_YELLOW # 黄灯
 
 # 控制单个电机
 class motor(iic_base.iic_base):
@@ -71,7 +97,8 @@ class motor(iic_base.iic_base):
     
     def run_to_relative_position(self, velocity, position, isBlock=True):# 以多少的速度运行到相对位置
         pass
-
+	def get_absolute_position(self): # 得到电机的绝对位置
+        pass
     
     
 # 电机对，控制两个电机
@@ -89,12 +116,14 @@ class motor_pair():
         pass
 ```
 
+> micro\:bit 下，必须给出电机的地址。默认地址无法使用
+
 
 
 ## motor
 
 ```python
-m1 = server_motor.motor(addr = 0x51)
+m1 = server_motor.motor(addr = server_motor.LIGHT_RED)
 ```
 
 > 控制单个电机
@@ -130,14 +159,16 @@ m1 = server_motor.motor(addr = 0x51)
 - `velocity` : 速度；-100 ~ 100
 - `position` : 位置；单位 度°
 
+### get_absolute_position
 
+> 得到电机的绝对位置
 
 
 
 ## motor_pair
 
 ```python
-motor = server_motor.motor_pair(addr1=0x51, addr2=0x52)
+motor = server_motor.motor_pair(addr1=server_motor.LIGHT_RED, addr2=server_motor.LIGHT_BLUE)
 ```
 
 > 控制两个电机；两个电机转动方向相反
@@ -167,7 +198,7 @@ motor = server_motor.motor_pair(addr1=0x51, addr2=0x52)
 
 
 
-# 遥感传感器
+# 摇杆传感器
 
 
 
@@ -259,12 +290,12 @@ js = joystick.joystick()
 
 
 ```python
-GUNSHOT       = 1 # 枪声
-LASER         = 2 # 激光
-MOTORCYCLE    = 3 # 摩托车
-WARBEGIN      = 4 # 战争开始
-COUNTDOWN     = 5 # 倒计时
-PLAYRECORDING = 6 # 播放录音
+GUNSHOT        # 枪声
+LASER          # 激光
+MOTORCYCLE     # 摩托车
+WARBEGIN       # 战争开始
+COUNTDOWN      # 倒计时
+PLAYRECORDING  # 播放录音
 
 class recording(iic_base.iic_base):
     def __init__(self, port=0, addr=0x18):
@@ -494,7 +525,7 @@ class servos():
     def __init__(self, port):
         pass
 
-    def angle(self, angle:int): # 设置角度 0 - 180
+    def write_angle(self, angle:int): # 设置角度 0 - 180
         pass
 ```
 
@@ -508,7 +539,7 @@ ser = servos.servos(servos.S1)
 
 
 
-### angle
+### write_angle
 
 > 设置舵机角度
 

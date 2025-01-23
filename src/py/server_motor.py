@@ -1,6 +1,14 @@
 import iic_base
 import time
 
+
+GENERAL      = 0x50 # 通用地址
+LIGHT_RED    = 0x51 # 红灯
+LIGHT_GREEN  = 0x52 # 绿灯
+LIGHT_BLUE   = 0x53 # 蓝灯
+LIGHT_YELLOW = 0x54 # 黄灯
+
+
 servo_command_map = (
     (0x01, 0x01),
     (0x01, 0x02),
@@ -76,7 +84,16 @@ class motor(iic_base.iic_base):
             while not self._handle.is_end_run():
                 pass
 
-    
+    def get_absolute_position(self): # 得到电机的绝对位置
+        data = self._handle._get_data()
+        position = data[1]
+        singned_num = 0
+        if position >= 0x8000:  # 0x8000 是 32768
+            singned_num = position - 0x10000  # 转换为负数
+        else:
+            singned_num = position
+        return singned_num
+
     
 # 电机对，控制两个电机
 class motor_pair():
