@@ -648,3 +648,59 @@ ultr = ultrasonic.ultrasonic_sensor(ultrasonic.P13P0)
 
 
 
+# AI 相机
+
+
+
+<big>***文件：ai_camera.py***</big>
+
+
+
+```python
+AI_CAMERA_SYS     # 系统
+AI_CAMERA_COLOR   # 颜色获取
+AI_CAMERA_PATCH   # 色块追踪
+AI_CAMERA_TAG     # 标签识别
+AI_CAMERA_LINE    # 线条识别
+AI_CAMERA_20_CLASS# 20类物体识别
+AI_CAMERA_QRCODE  # 二维码识别
+AI_CAMERA_FACE_DE # 人脸检测
+AI_CAMERA_FACE_RE # 人脸识别
+AI_CAMERA_DEEP_LEARN # 升读学习
+AI_CAMERA_CARD # 卡片识别
+
+class ai_camera(iic_base.iic_base):
+    def __init__(self, port=0, addr=0x24):
+        pass
+def set_sys_mode(self, mode:int): # 设置系统模式
+        pass
+    def get_sys_mode(self): # 获取系统模式
+        pass
+    def get_color_rgb(self): # 获取颜色识别的RGB值
+        pass
+    def face_re_study(self): # 人脸识别学习
+        pass
+    def deep_learn_study(self): # 深度学习学习
+        pass
+    def get_identify_num(self, features): # 得到识别的数量
+        pass
+    def get_identify_id(self, features, index=0): # 得到识别的ID
+        pass
+    def get_identify_rot(self, features, index=0): # 得到识别的角度
+        pass
+    def get_identify_position(self, features, index=0): # 得到识别的位置
+        pass
+```
+
+
+
+## ai_camera
+
+
+
+
+
+
+
+
+
