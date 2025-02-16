@@ -28,12 +28,9 @@ while True:
 
 
 ```python
-
 class iic_base:
-
     def is_ready(self): # 是否在线
         pass
-    
 ```
 
 
@@ -327,7 +324,7 @@ re = recording.recording()
 
 
 
-<big>***文件：six_gry.py***</big>
+<big>***文件：six_gray.py***</big>
 
 
 
@@ -343,7 +340,7 @@ class six_gray_sensor(iic_base.iic_base):
         pass
     
     def color(self, port=None): # 颜色
-        spass
+        pass
 
     def black(self, port=None): # 黑线
         pass
@@ -644,7 +641,9 @@ ultr = ultrasonic.ultrasonic_sensor(ultrasonic.P13P0)
 
 ### get
 
-> 得到测量的距离，单位为 mc
+> 得到测量的距离，单位为 cm
+
+
 
 
 
@@ -666,41 +665,153 @@ AI_CAMERA_20_CLASS# 20类物体识别
 AI_CAMERA_QRCODE  # 二维码识别
 AI_CAMERA_FACE_DE # 人脸检测
 AI_CAMERA_FACE_RE # 人脸识别
-AI_CAMERA_DEEP_LEARN # 升读学习
+AI_CAMERA_DEEP_LEARN # 深度学习
 AI_CAMERA_CARD # 卡片识别
+
 
 class ai_camera(iic_base.iic_base):
     def __init__(self, port=0, addr=0x24):
         pass
-def set_sys_mode(self, mode:int): # 设置系统模式
+    def set_sys_mode(self, mode:int): # 设置系统模式
         pass
     def get_sys_mode(self): # 获取系统模式
         pass
     def get_color_rgb(self): # 获取颜色识别的RGB值
         pass
-    def face_re_study(self): # 人脸识别学习
+    def set_find_color(self, color):
         pass
-    def deep_learn_study(self): # 深度学习学习
-        pass
-    def get_identify_num(self, features): # 得到识别的数量
-        pass
+    def face_study(self): # 人脸识别学习
+        pass 
+    def deep_learn_study(self): # 深度学习
+         pass
+    def get_qrcode_content(self): # 获取二维码信息
+         pass
+    def get_identify_num(self, features, total=0): # 得到识别的数量
+         pass
     def get_identify_id(self, features, index=0): # 得到识别的ID
-        pass
-    def get_identify_rot(self, features, index=0): # 得到识别的角度
-        pass
+         pass
+    def get_identify_rotation(self, features, index=0): # 得到识别的角度
+         pass
     def get_identify_position(self, features, index=0): # 得到识别的位置
+		pass
+    def get_identify_confidence(self, features, id): # 得到识别的置信度
         pass
 ```
 
 
 
+在调用对应的对象时，应先确定该功能是否有相关的数据，否则会返回0
+
 ## ai_camera
 
+```python
+aic = ai_camera.ai_camera()
+```
 
 
 
+### set_sys_mode
+
+> 设置工作模式
+>
+> 取值：AI_CAMERA_COLOR ~ AI_CAMERA_CARD
 
 
 
+### get_sys_mode
 
+> 获取系统的工作模式
+
+
+
+### get_color_rgb
+
+> 得到颜色识别的rgb值
+>
+> 返回：（r， g， b）
+
+
+
+### set_find_color
+
+> 设置色块追踪的颜色
+>
+> 取值为 `color.py` 文件下的值，需要首先确定支持该颜色
+>
+> 目前 （红 绿 蓝 黄 黑 白）
+
+
+
+### face_study
+
+> 使人脸识别学习
+
+
+
+### deep_learn_study
+
+> 使深度学习
+
+
+
+### get_qrcode_content
+
+> 得到二维码识别的字符信息
+
+
+
+### get_identify_num
+
+> 得到识别到的数量
+
+- `features` : 功能选择，取值：AI_CAMERA_COLOR ~ AI_CAMERA_CARD
+
+- `total` ：默认为0，在人脸识别下，设置为1，返回检测到（非识别到）所有人脸的数量
+
+
+
+### get_identify_id
+
+> 得到被识别物体的id
+
+- `features` : 功能选择，取值：AI_CAMERA_COLOR ~ AI_CAMERA_CARD
+- `index` ：对于可以多物体识别，index用于选择第几个物体的id （0~3）
+
+
+
+### get_identify_rotation
+
+> 得到被识别物体的旋转角度
+>
+> 返回：0~359
+
+- `features` : 功能选择，取值：AI_CAMERA_COLOR ~ AI_CAMERA_CARD
+
+- `index` ：对于可以多物体识别，index用于选择第几个物体的id （0~3）
+
+
+
+### get_identify_position
+
+> 得到被识别物体的位置
+>
+> 返回 [x, y, w, h]
+
+- `features` : 功能选择，取值：AI_CAMERA_COLOR ~ AI_CAMERA_CARD
+
+- `index` ：对于可以多物体识别，index用于选择第几个物体的id （0~3）
+
+
+
+### get_identify_confidence
+
+> 得到被识别物体的置信度
+>
+> <mark>只有深度学习可以使用并读取到</mark>
+>
+> 返回：0~100
+
+- `features` : 功能选择，取值：AI_CAMERA_COLOR ~ AI_CAMERA_CARD
+
+- `id` ：选择哪个id的置信度 （0~3），不在范围内返回0
 

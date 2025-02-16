@@ -37,13 +37,8 @@ class iic_base:
         except:
             return 0
         return 1
-    
-# iic_init_flag = False
+
 def iic_init():
-    # global iic_init_flag
-    # if iic_init_flag == False:
-    #     iic_init_flag = True
-    #     # i2c.init() # 初始化iic
     i2c.init()
     	
 iic_init()

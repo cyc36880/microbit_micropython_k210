@@ -21,6 +21,15 @@ color_tab = {
     GREEN: 2,
     BLUE  : 3,
 }
+patch_color_tab = {
+    6: WHITE,
+    5:BLACK,
+    1:RED,
+    4:YELLOW,
+    2:GREEN,
+    3:BLUE,
+}
+
 obj_sys = {}
 obj_color = {}
 obj_patch = {
@@ -89,6 +98,7 @@ obj_face_re = {
 obj_self_learn = {
     "num":0x01,
     "id":0x02,
+    "confidence":0x03,
 }
 obj_card = {
     "num":0x00,
@@ -139,7 +149,7 @@ class ai_camera(iic_base.iic_base):
         self._handle.write_reg(0, [mode-1])
 
     def get_sys_mode(self): # 获取系统模式
-        return self._handle.read_reg(0, 1)[0]
+        return self._handle.read_reg(0, 1)[0]+1
     
     def get_color_rgb(self): # 获取颜色识别的RGB值
         rgb = self._handle.read_reg(15, 3)
@@ -152,18 +162,27 @@ class ai_camera(iic_base.iic_base):
         color_id = color_tab[color]
         self._handle.write_reg(get_register_addr(AI_CAMERA_PATCH, 0x00), [color_id])
         
-    def face_re_study(self): # 人脸识别学习
+    def face_study(self): # 人脸识别学习
         self._handle.write_reg(get_register_addr(AI_CAMERA_FACE_RE, 0x06), [0x01])
         
     def deep_learn_study(self): # 深度学习
         self._handle.write_reg(get_register_addr(AI_CAMERA_DEEP_LEARN, 0x00), [0x01])
     
-    def get_qrcode_info(self): # 获取二维码信息
+    def get_qrcode_content(self): # 获取二维码信息
         num = self._handle.read_reg(get_register_addr(AI_CAMERA_QRCODE, 0x01), 1)[0]
-        return self._handle.read_reg(get_register_addr(AI_CAMERA_QRCODE, 0x03), num)
+        str = self._handle.read_reg(get_register_addr(AI_CAMERA_QRCODE, 0x03), num)
+        try:
+            return str.decode('utf-8')
+        except:
+            if len(str) == 0:
+                return ""
+            return str
 
-    def get_identify_num(self, features): # 得到识别的数量
+    def get_identify_num(self, features, total=0): # 得到识别的数量
         target_base_addr = get_register_addr(features, 0)
+        if features == AI_CAMERA_FACE_RE:
+            if total==1:
+                return self._handle.read_reg(target_base_addr+0, 1)[0]
         target_func = sys_register[features]
         if "num" in target_func:
             _offset = target_func["num"]
@@ -178,12 +197,19 @@ class ai_camera(iic_base.iic_base):
             return self._handle.read_reg(target_base_addr + _offset, 1)[0]
         elif "target" in target_func:
             id_offset = target_func["target"]["base_addr"]
-            _offset = target_func["target"]["info"]["id"]
-            return self._handle.read_reg(target_base_addr + id_offset+index, get_info_size(target_func["target"]["info"]))[_offset]
+            if "id" in  target_func["target"]["info"]:
+                _offset = target_func["target"]["info"]["id"]
+                ret_id = self._handle.read_reg(target_base_addr + id_offset+index, get_info_size(target_func["target"]["info"]))[_offset]
+                if features==AI_CAMERA_PATCH:
+                    return color_tab[ret_id] if ret_id in color_tab else ret_id
+                else:
+                    return ret_id
+            else:
+                return 0
         else:
             return 0
 
-    def get_identify_rot(self, features, index=0): # 得到识别的角度
+    def get_identify_rotation(self, features, index=0): # 得到识别的角度
         rot = [0]*2
         target_base_addr = get_register_addr(features, 0)
         target_func = sys_register[features]
@@ -210,4 +236,12 @@ class ai_camera(iic_base.iic_base):
             _pos = self._handle.read_reg(target_base_addr + pos_offset+index, get_info_size(target_func["target"]["info"]))
             pos = position_disposal(_pos[_offset:_offset+8])
         return pos
-    
+    def get_identify_confidence(self, features, id): # 得到识别的置信度
+        if id > 3:
+            return 0
+        target_base_addr = get_register_addr(features, 0)
+        target_func = sys_register[features]
+        if "confidence" in target_func:
+            _offset = target_func["confidence"]
+            return self._handle.read_reg(target_base_addr + _offset, 4)[id]
+        return 0
