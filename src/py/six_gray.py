@@ -31,6 +31,8 @@ class six_gray_sensor(iic_base.iic_base):
     def gray_study(self): # 灰度学习
         self._handle.write_bytes([4])
 
+    def binary_study(self): # 二值学习
+        self._handle.write_bytes([5])
 
     def gray(self, port=None): # 灰度
         self._handle.write_bytes([MODE_GRAY])

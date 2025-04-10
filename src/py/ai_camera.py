@@ -11,8 +11,11 @@ AI_CAMERA_FACE_DE=7
 AI_CAMERA_FACE_RE=8
 AI_CAMERA_DEEP_LEARN=9
 AI_CAMERA_CARD=10
+AI_CAMERA_WIFI_SERVER=11
+AI_CAMERA_USER_IMAGE_DETECTION=12
+AI_CALERA_USER_IMAGE_CLASS=13
 
-register_addr = (0,15,39,63,87,111,135,159,183,207,231)
+register_addr = (0,15,30,45,60,75,90,105,120,135,150, 165, 180, 195)
 color_tab = {
     WHITE:6,
     BLACK:5,
@@ -112,7 +115,27 @@ obj_card = {
         }
     }
 }
-sys_register = (obj_sys, obj_color, obj_patch, obj_tag, obj_line, obj_20_class, obj_qrcode, obj_face_de, obj_face_re, obj_self_learn, obj_card)
+obj_wifi_server = {}
+obj_ur_image_det = {
+    "num" : 0x03,
+    "target":
+    {
+        "base_addr" : 0x04,
+        "info":
+        {
+            "id"  : 0,
+            "pos" : 1,
+        }
+    }
+}
+obj_ur_image_class = {
+    "num":0x01,
+    "id" :0x02,
+}
+
+sys_register = (obj_sys, obj_color, obj_patch, obj_tag, obj_line, obj_20_class, 
+                obj_qrcode, obj_face_de, obj_face_re, obj_self_learn, obj_card, 
+                obj_wifi_server, obj_ur_image_det, obj_ur_image_class)
 def uint16_to_int32(data):
     if data >= 0x8000:
         return data - 0x10000
@@ -236,6 +259,7 @@ class ai_camera(iic_base.iic_base):
             _pos = self._handle.read_reg(target_base_addr + pos_offset+index, get_info_size(target_func["target"]["info"]))
             pos = position_disposal(_pos[_offset:_offset+8])
         return pos
+    
     def get_identify_confidence(self, features, id): # 得到识别的置信度
         if id > 3:
             return 0
@@ -245,3 +269,50 @@ class ai_camera(iic_base.iic_base):
             _offset = target_func["confidence"]
             return self._handle.read_reg(target_base_addr + _offset, 4)[id]
         return 0
+    
+    def set_wifi_server_ssid_passward(self, ssid:str, password:str):
+        ssid_list = [len(ssid)]
+        password_list = [len(ssid)]
+        for ch in ssid:
+            ssid_list.append(ord(ch))
+        for ch in password:
+            password_list.append(ord(ch))
+        target_base_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 0)
+        self._handle.write_reg(target_base_addr + 0x00, ssid_list)
+        self._handle.write_reg(target_base_addr + 0x01, password_list)
+
+    def get_wifi_server_ip(self):
+        target_base_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 2)
+        len = self._handle.read_reg(target_base_addr, 1)[0]
+        return self._handle.read_reg(target_base_addr + 1, len)[1:].decode('utf-8')
+
+    def set_image_detection_model_info(self, model_size:int, anchors:str, identify_num:int):
+        target_base_addr = get_register_addr(AI_CAMERA_USER_IMAGE_DETECTION, 0)
+        model_size_addr = target_base_addr+0
+        anchors_addr = target_base_addr+1
+        identify_num_addr = target_base_addr+2
+
+        model_size_str = str(model_size)
+        model_size_list = [len(model_size_str)]
+        for ch in model_size_str:
+            model_size_list.append(ord(ch))
+
+        anchors_list = [len(anchors)]
+        for ch in anchors:
+            anchors_list.append(ord(ch))
+        self._handle.write_reg(model_size_addr, model_size_list)
+        self._handle.write_reg(anchors_addr, anchors_list)
+        self._handle.write_reg(identify_num_addr, [identify_num])
+    
+    def set_image_class_model_info(self, model_size:int):
+        target_base_addr = get_register_addr(AI_CALERA_USER_IMAGE_CLASS, 0)
+        model_size_addr = target_base_addr+0
+
+        model_size_str = str(model_size)
+        model_size_list = [len(model_size_str)]
+        for ch in model_size_str:
+            model_size_list.append(ord(ch))
+        self._handle.write_reg(model_size_addr, model_size_list)
+
+        
+

@@ -11,7 +11,7 @@
 ```python
 import server_motor # 导入库（文件名）
 
-m1 = server_motor.motor(addr = 0x51) # 创建设备对象
+m1 = server_motor.motor(addr = server_motor.LIGHT_RED) # 创建设备对象
 
 while True:
     m1.run(20) # 对象使用
