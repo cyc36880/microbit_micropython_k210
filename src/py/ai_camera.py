@@ -7,13 +7,13 @@ AI_CAMERA_TAG=3
 AI_CAMERA_LINE=4
 AI_CAMERA_20_CLASS=5
 AI_CAMERA_QRCODE=6
-AI_CAMERA_FACE_DE=7
+AI_CAMERA_FACE_ATTRIBUTE=7
 AI_CAMERA_FACE_RE=8
 AI_CAMERA_DEEP_LEARN=9
 AI_CAMERA_CARD=10
 AI_CAMERA_WIFI_SERVER=11
-AI_CAMERA_USER_IMAGE_DETECTION=12
-AI_CALERA_USER_IMAGE_CLASS=13
+# AI_CAMERA_USER_IMAGE_DETECTION=12
+# AI_CALERA_USER_IMAGE_CLASS=13
 
 register_addr = (0,15,30,45,60,75,90,105,120,135,150, 165, 180, 195)
 color_tab = {
@@ -270,21 +270,37 @@ class ai_camera(iic_base.iic_base):
             return self._handle.read_reg(target_base_addr + _offset, 4)[id]
         return 0
     
+    def set_wifi_server_is_scan_qrcode(self, is_scan_qrcode:bool):
+        target_base_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 3)
+        self._handle.write_reg(target_base_addr, [0x01 if is_scan_qrcode else 0x00])
+    
+    def get_wifi_server_ssid_passward(self):
+        ssid_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 0)
+        password_addr = ssid_addr + 1
+        ssid_len = self._handle.read_reg(ssid_addr, 1)[0]+1
+        password_len = self._handle.read_reg(password_addr, 1)[0]+1
+        ssid = bytes(self._handle.read_reg(ssid_addr, ssid_len)[1:]).decode('utf-8')
+        password = bytes(self._handle.read_reg(password_addr, password_len)[1:]).decode('utf-8')
+        return ssid, password
+
     def set_wifi_server_ssid_passward(self, ssid:str, password:str):
+        ssid = ssid.encode('utf-8')
+        password = password.encode('utf-8')
         ssid_list = [len(ssid)]
-        password_list = [len(ssid)]
+        password_list = [len(password)]
         for ch in ssid:
-            ssid_list.append(ord(ch))
+            ssid_list.append(ch)
         for ch in password:
-            password_list.append(ord(ch))
+            password_list.append(ch)
         target_base_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 0)
         self._handle.write_reg(target_base_addr + 0x00, ssid_list)
         self._handle.write_reg(target_base_addr + 0x01, password_list)
+        self.set_wifi_server_is_scan_qrcode(0)
 
     def get_wifi_server_ip(self):
         target_base_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 2)
-        len = self._handle.read_reg(target_base_addr, 1)[0]
-        return self._handle.read_reg(target_base_addr + 1, len)[1:].decode('utf-8')
+        len = self._handle.read_reg(target_base_addr, 1)[0]+1
+        return bytes(self._handle.read_reg(target_base_addr, len)[1:]).decode('utf-8')
 
     def set_image_detection_model_info(self, model_size:int, anchors:str, identify_num:int):
         target_base_addr = get_register_addr(AI_CAMERA_USER_IMAGE_DETECTION, 0)

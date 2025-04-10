@@ -22,7 +22,7 @@ _ultr_pin_map = \
 }
 
 def _get_pin_time_pulse_us(pin):
-    return machine.time_pulse_us(pin, 1, 5000)
+    return machine.time_pulse_us(pin, 1, 25000)
 
 class ultrasonic_sensor:
     def __init__(self, port):
@@ -38,7 +38,7 @@ class ultrasonic_sensor:
         self.trigpin.write_digital(0)
         tim = _get_pin_time_pulse_us(self.echopin)
         distance = tim * 34 / 2 / 1000 * 3 / 2;
-        return distance
+        return distance if distance > 0 else 0
         
         
 
