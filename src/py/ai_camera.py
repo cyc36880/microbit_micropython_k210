@@ -302,33 +302,33 @@ class ai_camera(iic_base.iic_base):
         len = self._handle.read_reg(target_base_addr, 1)[0]+1
         return bytes(self._handle.read_reg(target_base_addr, len)[1:]).decode('utf-8')
 
-    def set_image_detection_model_info(self, model_size:int, anchors:str, identify_num:int):
-        target_base_addr = get_register_addr(AI_CAMERA_USER_IMAGE_DETECTION, 0)
-        model_size_addr = target_base_addr+0
-        anchors_addr = target_base_addr+1
-        identify_num_addr = target_base_addr+2
+    # def set_image_detection_model_info(self, model_size:int, anchors:str, identify_num:int):
+    #     target_base_addr = get_register_addr(AI_CAMERA_USER_IMAGE_DETECTION, 0)
+    #     model_size_addr = target_base_addr+0
+    #     anchors_addr = target_base_addr+1
+    #     identify_num_addr = target_base_addr+2
 
-        model_size_str = str(model_size)
-        model_size_list = [len(model_size_str)]
-        for ch in model_size_str:
-            model_size_list.append(ord(ch))
+    #     model_size_str = str(model_size)
+    #     model_size_list = [len(model_size_str)]
+    #     for ch in model_size_str:
+    #         model_size_list.append(ord(ch))
 
-        anchors_list = [len(anchors)]
-        for ch in anchors:
-            anchors_list.append(ord(ch))
-        self._handle.write_reg(model_size_addr, model_size_list)
-        self._handle.write_reg(anchors_addr, anchors_list)
-        self._handle.write_reg(identify_num_addr, [identify_num])
+    #     anchors_list = [len(anchors)]
+    #     for ch in anchors:
+    #         anchors_list.append(ord(ch))
+    #     self._handle.write_reg(model_size_addr, model_size_list)
+    #     self._handle.write_reg(anchors_addr, anchors_list)
+    #     self._handle.write_reg(identify_num_addr, [identify_num])
     
-    def set_image_class_model_info(self, model_size:int):
-        target_base_addr = get_register_addr(AI_CALERA_USER_IMAGE_CLASS, 0)
-        model_size_addr = target_base_addr+0
+    # def set_image_class_model_info(self, model_size:int):
+    #     target_base_addr = get_register_addr(AI_CALERA_USER_IMAGE_CLASS, 0)
+    #     model_size_addr = target_base_addr+0
 
-        model_size_str = str(model_size)
-        model_size_list = [len(model_size_str)]
-        for ch in model_size_str:
-            model_size_list.append(ord(ch))
-        self._handle.write_reg(model_size_addr, model_size_list)
+    #     model_size_str = str(model_size)
+    #     model_size_list = [len(model_size_str)]
+    #     for ch in model_size_str:
+    #         model_size_list.append(ord(ch))
+    #     self._handle.write_reg(model_size_addr, model_size_list)
 
         
 
