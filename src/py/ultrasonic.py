@@ -38,6 +38,7 @@ class ultrasonic_sensor:
         self.trigpin.write_digital(0)
         tim = _get_pin_time_pulse_us(self.echopin)
         distance = tim * 34 / 2 / 1000 * 3 / 2;
+        distance = int(distance)
         return distance if distance > 0 else 0
         
         
