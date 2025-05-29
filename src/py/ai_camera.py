@@ -12,10 +12,10 @@ AI_CAMERA_FACE_RE=8
 AI_CAMERA_DEEP_LEARN=9
 AI_CAMERA_CARD=10
 AI_CAMERA_WIFI_SERVER=11
-# AI_CAMERA_USER_IMAGE_DETECTION=12
-# AI_CALERA_USER_IMAGE_CLASS=13
+AI_CAMERA_SETTING = 12
 
-register_addr = (0,15,30,45,60,75,90,105,120,135,150, 165, 180, 195)
+
+register_addr = (0,15,30,45,60,75,90,105,120,135,150, 165, 180)
 color_tab = {
     WHITE:6,
     BLACK:5,
@@ -282,6 +282,15 @@ class ai_camera(iic_base.iic_base):
             _offset = target_func["confidence"]
             return self._handle.read_reg(target_base_addr + _offset, 4)[id]
         return 0
+        
+    def set_light_brightness(self, brightness):
+        target_base_addr = get_register_addr(AI_CAMERA_SETTING, 0)
+        self._handle.write_reg(target_base_addr, [brightness])
+        return brightness
+    
+    def get_light_brightness(self):
+        target_base_addr = get_register_addr(AI_CAMERA_SETTING, 0)
+        return self._handle.read_reg(target_base_addr, 1)[0]
     
     def set_wifi_server_is_scan_qrcode(self, is_scan_qrcode:bool):
         target_base_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 3)
