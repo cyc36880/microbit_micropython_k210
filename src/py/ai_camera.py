@@ -75,7 +75,7 @@ obj_qrcode = {
     "pos":0x02,
     "addinfo":0x03,
 }
-obj_face_de = {
+obj_face_attr = {
     "num":0x00,
     "target":
     {
@@ -134,7 +134,7 @@ obj_ur_image_class = {
 }
 
 sys_register = (obj_sys, obj_color, obj_patch, obj_tag, obj_line, obj_20_class, 
-                obj_qrcode, obj_face_de, obj_face_re, obj_self_learn, obj_card, 
+                obj_qrcode, obj_face_attr, obj_face_re, obj_self_learn, obj_card, 
                 obj_wifi_server, obj_ur_image_det, obj_ur_image_class)
 def uint16_to_int32(data):
     if data >= 0x8000:
@@ -147,7 +147,10 @@ def get_info_size(info_handle):
     info_size=0
     for key in info_handle:
         if key == "id":
-            info_size += 1
+            if obj_tag["target"]["info"] == info_handle:
+                info_size += 2
+            else:
+                info_size += 1
         elif key == "rot":
             info_size += 2
         elif key == "pos":
@@ -212,6 +215,12 @@ class ai_camera(iic_base.iic_base):
             return self._handle.read_reg(target_base_addr + _offset, 1)[0]
         return 0
     
+    def get_identify_face_attribute(self, index=0):
+        target_base_addr = get_register_addr(AI_CAMERA_FACE_ATTRIBUTE, 5)
+        data = self._handle.read_reg(target_base_addr+index, 4)
+        return (data[1], data[2], data[3])
+
+    
     def get_identify_id(self, features, index=0): # 得到识别的ID
         target_base_addr = get_register_addr(features, 0)
         target_func = sys_register[features]
@@ -222,7 +231,11 @@ class ai_camera(iic_base.iic_base):
             id_offset = target_func["target"]["base_addr"]
             if "id" in  target_func["target"]["info"]:
                 _offset = target_func["target"]["info"]["id"]
-                ret_id = self._handle.read_reg(target_base_addr + id_offset+index, get_info_size(target_func["target"]["info"]))[_offset]
+                if features==AI_CAMERA_TAG:
+                    read_val = self._handle.read_reg(target_base_addr + id_offset+index, get_info_size(target_func["target"]["info"]))
+                    return (read_val[_offset]<<8) | read_val[_offset+1]
+                else:
+                    ret_id = self._handle.read_reg(target_base_addr + id_offset+index, get_info_size(target_func["target"]["info"]))[_offset]
                 if features==AI_CAMERA_PATCH:
                     return color_tab[ret_id] if ret_id in color_tab else ret_id
                 else:
