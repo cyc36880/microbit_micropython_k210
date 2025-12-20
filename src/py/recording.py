@@ -9,8 +9,7 @@ PLAYRECORDING = 6 # 播放录音
 
 class recording(iic_base.iic_base):
     def __init__(self, port=0, addr=0x18):
-        self._handle=iic_base.iic_base(port, addr)
         super().__init__(port, addr)
 
     def voice(self, index:int):
-        self._handle.write_bytes([index])
+        self.write_bytes([index])

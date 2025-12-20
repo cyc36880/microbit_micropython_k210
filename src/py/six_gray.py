@@ -24,35 +24,34 @@ def ret_data(data, port):
         return data[port]
 
 class six_gray_sensor(iic_base.iic_base):
-    def __init__(self, port=0, addr=0x70):
-        self._handle = iic_base.iic_base(port, addr)
+    def __init__(self, port=0, addr=0x6F):
         super().__init__(port, addr)
 
     def gray_study(self): # 灰度学习
-        self._handle.write_bytes([4])
+        self.write_bytes([4])
 
     def binary_study(self): # 二值学习
-        self._handle.write_bytes([5])
+        self.write_bytes([5])
 
     def gray(self, port=None): # 灰度
-        self._handle.write_bytes([MODE_GRAY])
-        data = self._handle.read_bytes(6)
+        self.write_bytes([MODE_GRAY])
+        data = self.read_bytes(6)
         ret_val = [0]*6
         for i in range(6):
             ret_val[i] = data[i]
         return ret_data(ret_val, port)
     
     def color(self, port=None): # 颜色
-        self._handle.write_bytes([MODE_COLOR])
-        data = self._handle.read_bytes(6)
+        self.write_bytes([MODE_COLOR])
+        data = self.read_bytes(6)
         ret_val = [0]*6
         for i in range(6):
             ret_val[i] = _color_map[data[i]]
         return ret_data(ret_val, port)
 
     def black(self, port=None): # 黑线
-        self._handle.write_bytes([MODE_GRAY])
-        data = self._handle.read_bytes(6)
+        self.write_bytes([MODE_GRAY])
+        data = self.read_bytes(6)
         ret_val = [0]*6
         for i in range(6):
             ret_val[i] = 1 if data[i] > 120 else 0
