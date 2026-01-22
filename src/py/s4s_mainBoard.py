@@ -25,9 +25,8 @@ class s4s_mainBoard(iic_base.iic_base):
     # ---------------- 充电管理 ----------------
     def charging_get_state(self):
         """返回 (is_charging:bool, voltage:int 0~100)"""
-        is_charging = self.read_reg(self.CHARGING_REG+0, 1)[0]
-        charging_voltage = self.read_reg(self.CHARGING_REG+1, 1)[0]
-        return [is_charging, charging_voltage]
+        charging_voltage = self.read_reg(self.CHARGING_REG+0, 1)[0]
+        return charging_voltage
 
     # ---------------- 氛围灯 ----------------
     def ambient_light_set_state(self, light=None, color=None):
@@ -65,6 +64,12 @@ class s4s_mainBoard(iic_base.iic_base):
         if servo_id > 1:
             raise ValueError("servo_id only 0 or 1")
         self.write_reg(self.SERVO_REG + servo_id, [angle])
+
+    def continuous_servo_set_speed(self, servo_id, speed):
+        """speed 0~100"""
+        if servo_id > 1:
+            raise ValueError("servo_id only 0 or 1")
+        self.write_reg(self.SERVO_REG + servo_id + 1, [struct.unpack('B', struct.pack('b', speed))[0]])
 
     # ---------------- 陀螺仪 ----------------
     def gyro_enable(self, en: bool):
@@ -107,6 +112,14 @@ class s4s_mainBoard(iic_base.iic_base):
         angleZ = angleZ if angleZ < 32768 else angleZ - 65536
         return self._ret_data_([angleX, angleY, angleZ], sel ) # angleX, angleY, angleZ
 
+    def gyro_get_tilted(self):
+        buf = self.read_reg(self.GYROSCOPE_REG + 5, 1)
+        return buf[0]
+    
+    def gyro_get_orientation(self):
+        buf = self.read_reg(self.GYROSCOPE_REG + 6, 1)
+        return buf[0]
+
     # ---------------- 编码电机 ----------------
     def _motor_reg(self, motor_id):
         if motor_id > 3:
@@ -138,8 +151,7 @@ class s4s_mainBoard(iic_base.iic_base):
 
     def encoder_motor_set_power(self, motor_id, power):
         """power 0~100"""
-        data = list(struct.unpack('BB', struct.pack('>h', int(power))))
-        self.write_reg(self._motor_reg(motor_id) + 5, data)
+        self.write_reg(self._motor_reg(motor_id) + 5, [power])
 
     def encoder_motor_set_ring(self, motor_id, ring):
         """ring 0~100"""

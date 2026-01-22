@@ -29,7 +29,7 @@ data:
 def encoder_motor_run_dir_3state(motor, dir, state, data):
     if state == 0:
         mainBoard.encoder_motor_set_ring(motor, data)
-        mainBoard.encoder_motor_set_action(motor, dir+1)
+        mainBoard.encoder_motor_set_action(motor, dir+5)
     elif state == 1:
         mainBoard.encoder_motor_set_relative_angle(motor, data)
         mainBoard.encoder_motor_set_action(motor, dir+7)
@@ -124,4 +124,4 @@ def encoder_motor_pair_set_speed(l_speed, r_speed):
 以【0-100】【0-100】%速度移动
 '''
 def encoder_motor_pair_set_run_speed(speed):
-    encoder_motor_pair_set_run_speed(speed, speed)
+    encoder_motor_pair_set_speed(speed, speed)

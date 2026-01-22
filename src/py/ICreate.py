@@ -34,3 +34,6 @@ ICM_lightP7P8 = light_ring.light_ring(light_ring.P7P8)
 ICM_lightP9P12 = light_ring.light_ring(light_ring.P9P12)
 ICM_lightP10P16 = light_ring.light_ring(light_ring.P10P16)
 aiCamera = ai_camera.ai_camera()
+
+def get_version():
+    return "1.0.0"
