@@ -65,11 +65,12 @@ class s4s_mainBoard(iic_base.iic_base):
             raise ValueError("servo_id only 0 or 1")
         self.write_reg(self.SERVO_REG + servo_id, [angle])
 
+    # --------------- 连续舵机 ---------------
     def continuous_servo_set_speed(self, servo_id, speed):
-        """speed 0~100"""
+        """speed -100~100"""
         if servo_id > 1:
             raise ValueError("servo_id only 0 or 1")
-        self.write_reg(self.SERVO_REG + servo_id + 1, [struct.unpack('B', struct.pack('b', speed))[0]])
+        self.write_reg(self.SERVO_REG + servo_id + 2, [struct.unpack('B', struct.pack('b', speed))[0]])
 
     # ---------------- 陀螺仪 ----------------
     def gyro_enable(self, en: bool):
