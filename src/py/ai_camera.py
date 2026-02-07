@@ -11,7 +11,8 @@ AI_CAMERA_FACE_ATTRIBUTE=7
 AI_CAMERA_FACE_RE=8
 AI_CAMERA_DEEP_LEARN=9
 AI_CAMERA_CARD=10
-AI_CAMERA_WIFI_SERVER=11
+AI_CAMERA_AI_CHAT=11
+AI_CAMERA_WIFI_STREAM=11
 AI_CAMERA_SETTING = 12
 
 
@@ -132,6 +133,12 @@ def uint16_to_int32(data):
         return data - 0x10000
     else:
         return data
+
+def uint8_to_int8(data):
+    if data > 127:
+        data -= 256 
+    return data
+
 def get_register_addr(index, offset):
     return register_addr[index] + offset
 def get_info_size(info_handle):
@@ -262,16 +269,6 @@ class ai_camera(iic_base.iic_base):
             _pos = self.read_reg(target_base_addr + pos_offset+index, get_info_size(target_func["target"]["info"]))
             pos = position_disposal(_pos[_offset:_offset+8])
         return pos
-    
-    def get_identify_confidence(self, features, id): # 得到识别的置信度
-        if id > 3:
-            return 0
-        target_base_addr = get_register_addr(features, 0)
-        target_func = sys_register[features]
-        if "confidence" in target_func:
-            _offset = target_func["confidence"]
-            return self.read_reg(target_base_addr + _offset, 4)[id]
-        return 0
 
     def set_light_state(self, state):
         target_base_addr = get_register_addr(AI_CAMERA_SETTING, 1)
@@ -286,38 +283,47 @@ class ai_camera(iic_base.iic_base):
         target_base_addr = get_register_addr(AI_CAMERA_SETTING, 0)
         return self.read_reg(target_base_addr, 1)[0]
     
-    def set_wifi_server_is_scan_qrcode(self, is_scan_qrcode:bool):
-        target_base_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 3)
-        self.write_reg(target_base_addr, [0x01 if is_scan_qrcode else 0x00])
-    
-    def get_wifi_server_ssid_passward(self):
-        ssid_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 0)
+    def get_ai_chat_state(self):
+        target_base_addr = get_register_addr(AI_CAMERA_AI_CHAT, 4)
+        return self.read_reg(target_base_addr, 1)[0]
+
+    def get_ai_chat_run_state(self):
+        target_base_addr = get_register_addr(AI_CAMERA_AI_CHAT, 5)
+        data = self.read_reg(target_base_addr, 2)
+        return (data[0], data[1])
+
+    def get_ai_chat_custom_command(self):
+        target_base_addr = get_register_addr(AI_CAMERA_AI_CHAT, 6)
+        return self.read_reg(target_base_addr, 1)[0]
+
+    def get_wifi_stream_joystick(self):
+        target_base_addr = get_register_addr(AI_CAMERA_WIFI_STREAM, 7)
+        data = self.read_reg(target_base_addr, 2)
+        pos_x = uint8_to_int8(data[0])
+        pos_y = uint8_to_int8(data[1])
+        return (pos_x, pos_y)
+
+    def get_wifi_stream_button(self):
+        target_base_addr = get_register_addr(AI_CAMERA_WIFI_STREAM, 8)
+        return self.read_reg(target_base_addr, 1)[0]
+
+    def get_wifi_stream_keyboard(self):
+        target_base_addr = get_register_addr(AI_CAMERA_WIFI_STREAM, 9)
+        return self.read_reg(target_base_addr, 1)[0]
+
+    def get_wifi_stream_ssid_passward(self):
+        ssid_addr = get_register_addr(AI_CAMERA_WIFI_STREAM, 0)
         password_addr = ssid_addr + 1
         ssid_len = self.read_reg(ssid_addr, 1)[0]+1
         password_len = self.read_reg(password_addr, 1)[0]+1
         ssid = bytes(self.read_reg(ssid_addr, ssid_len)[1:]).decode('utf-8')
         password = bytes(self.read_reg(password_addr, password_len)[1:]).decode('utf-8')
-        return ssid, password
+        return (ssid, password)
 
-    def set_wifi_server_ssid_passward(self, ssid:str, password:str):
-        ssid = ssid.encode('utf-8')
-        password = password.encode('utf-8')
-        ssid_list = [len(ssid)]
-        password_list = [len(password)]
-        for ch in ssid:
-            ssid_list.append(ch)
-        for ch in password:
-            password_list.append(ch)
-        target_base_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 0)
-        self.write_reg(target_base_addr + 0x00, ssid_list)
-        self.write_reg(target_base_addr + 0x01, password_list)
-        self.set_wifi_server_is_scan_qrcode(0)
-
-    def get_wifi_server_ip(self):
-        target_base_addr = get_register_addr(AI_CAMERA_WIFI_SERVER, 2)
+    def get_wifi_stream_ip(self):
+        target_base_addr = get_register_addr(AI_CAMERA_WIFI_STREAM, 2)
         len = self.read_reg(target_base_addr, 1)[0]+1
         return bytes(self.read_reg(target_base_addr, len)[1:]).decode('utf-8')
-
 
         
 

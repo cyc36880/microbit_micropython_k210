@@ -20,7 +20,7 @@ servo_command_map = (
     (0x12, 0x07),
     (0x13, 0x08),
     (0x14, 0x09)
-);
+)
 
 class motor_base(iic_base.iic_base):
     def __init__(self, port, addr):
