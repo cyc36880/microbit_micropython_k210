@@ -2,7 +2,7 @@ import iic_base
 from color import *
 AI_CAMERA_SYS=0
 AI_CAMERA_COLOR=1
-AI_CAMERA_PATCH=2
+AI_CAMERA_BLOB=2
 AI_CAMERA_TAG=3
 AI_CAMERA_LINE=4
 AI_CAMERA_20_CLASS=5
@@ -183,7 +183,7 @@ class ai_camera(iic_base.iic_base):
         if color not in color_tab:
             return
         color_id = color_tab[color]
-        self.write_reg(get_register_addr(AI_CAMERA_PATCH, 0x00), [color_id])
+        self.write_reg(get_register_addr(AI_CAMERA_BLOB, 0x00), [color_id])
         
     def face_study(self): # 人脸识别学习
         self.write_reg(get_register_addr(AI_CAMERA_FACE_RE, 0x06), [0x01])
@@ -233,7 +233,7 @@ class ai_camera(iic_base.iic_base):
                     return (read_val[_offset]<<8) | read_val[_offset+1]
                 else:
                     ret_id = self.read_reg(target_base_addr + id_offset+index, get_info_size(target_func["target"]["info"]))[_offset]
-                if features==AI_CAMERA_PATCH:
+                if features==AI_CAMERA_BLOB:
                     return color_tab[ret_id] if ret_id in color_tab else ret_id
                 else:
                     return ret_id
