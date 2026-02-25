@@ -8,10 +8,9 @@ class s4s_mainBoard(iic_base.iic_base):
     AMBIENT_LIGHT_REG      = 0x05
     RTC_REG                = 0x0A
     SERVO_REG              = 0x0F
-    GYROSCOPE_REG          = 0x14
-    VOICE_REG              = 0x1E
-    ENCODER_MOTOR_REG      = [0x50, 0x5A, 0x64, 0x6E]
-    ENCODER_MOTOR_PAIR_REG = 0x78
+    VOICE_REG              = 0x14
+    ENCODER_MOTOR_REG      = [0x50, 0x5F, 0x6E, 0x7D]
+    ENCODER_MOTOR_PAIR_REG = 0x8C
 
     def __init__(self, port=0, addr=0x0F):
         super().__init__(port, addr)
@@ -23,10 +22,25 @@ class s4s_mainBoard(iic_base.iic_base):
             return data[port]
         
     # ---------------- 充电管理 ----------------
-    def charging_get_state(self):
-        """返回 (is_charging:bool, voltage:int 0~100)"""
+    def power_get_internal_battery_level(self):
+        '''返回内部电池电量的百分比'''
         charging_voltage = self.read_reg(self.CHARGING_REG+0, 1)[0]
         return charging_voltage
+
+    def power_get_external_battery_voltage(self):
+        '''返回外部电池电量原始电压值'''
+        charging_voltage = self.read_reg(self.CHARGING_REG+1, 1)[0]
+        return charging_voltage/10
+
+    def power_is_charging(self):
+        '''返回是否正在充电'''
+        charging_state = self.read_reg(self.CHARGING_REG+2, 1)[0]
+        return charging_state
+    
+    def power_is_fully_charged(self):
+        '''返回是否已充满电'''
+        charging_state = self.read_reg(self.CHARGING_REG+3, 1)[0]
+        return charging_state
 
     # ---------------- 氛围灯 ----------------
     def ambient_light_set_state(self, light=None, color=None):
@@ -71,55 +85,6 @@ class s4s_mainBoard(iic_base.iic_base):
         if servo_id > 1:
             raise ValueError("servo_id only 0 or 1")
         self.write_reg(self.SERVO_REG + servo_id + 2, [struct.unpack('B', struct.pack('b', speed))[0]])
-
-    # ---------------- 陀螺仪 ----------------
-    def gyro_enable(self, en: bool):
-        self.write_reg(self.GYROSCOPE_REG, [int(en)])
-
-    def gyro_set_state(self, state):
-        """0 空闲  1 开始校准  2 重置偏航角"""
-        self.write_reg(self.GYROSCOPE_REG + 1, [state])
-
-    def gyro_get_state(self):
-        return self.read_reg(self.GYROSCOPE_REG + 1, 1)[0]
-
-    def gyro_get_acc(self, sel=None):
-        buf = self.read_reg(self.GYROSCOPE_REG + 2, 6)
-        accX = struct.unpack('>h', bytes(buf[0:2]))[0]
-        accY = struct.unpack('>h', bytes(buf[2:4]))[0]
-        accZ = struct.unpack('>h', bytes(buf[4:6]))[0]
-        accX = accX if accX < 32768 else accX - 65536
-        accY = accY if accY < 32768 else accY - 65536
-        accZ = accZ if accZ < 32768 else accZ - 65536
-        return self._ret_data_( [accX, accY, accZ], sel ) # accX, accY, accZ
-
-    def gyro_get_gyro(self, sel=None):
-        buf = self.read_reg(self.GYROSCOPE_REG + 3, 6)
-        gyroX = struct.unpack('>h', bytes(buf[0:2]))[0]
-        gyroY = struct.unpack('>h', bytes(buf[2:4]))[0]
-        gyroZ = struct.unpack('>h', bytes(buf[4:6]))[0]
-        gyroX = gyroX if gyroX < 32768 else gyroX - 65536
-        gyroY = gyroY if gyroY < 32768 else gyroY - 65536
-        gyroZ = gyroZ if gyroZ < 32768 else gyroZ - 65536
-        return self._ret_data_( [gyroX, gyroY, gyroZ], sel ) # gyroX, gyroY, gyroZ
-
-    def gyro_get_angle(self, sel=None):
-        buf = self.read_reg(self.GYROSCOPE_REG + 4, 6)
-        angleX = struct.unpack('>h', bytes(buf[0:2]))[0]
-        angleZ = struct.unpack('>h', bytes(buf[4:6]))[0]
-        angleY = struct.unpack('>h', bytes(buf[2:4]))[0]
-        angleX = angleX if angleX < 32768 else angleX - 65536
-        angleY = angleY if angleY < 32768 else angleY - 65536
-        angleZ = angleZ if angleZ < 32768 else angleZ - 65536
-        return self._ret_data_([angleX, angleY, angleZ], sel ) # angleX, angleY, angleZ
-
-    def gyro_get_tilted(self):
-        buf = self.read_reg(self.GYROSCOPE_REG + 5, 1)
-        return buf[0]
-    
-    def gyro_get_orientation(self):
-        buf = self.read_reg(self.GYROSCOPE_REG + 6, 1)
-        return buf[0]
 
     # ---------------- 编码电机 ----------------
     def _motor_reg(self, motor_id):
